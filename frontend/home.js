@@ -1,7 +1,6 @@
 // home.js
-
 document.addEventListener('DOMContentLoaded', () => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('loggedInUser')); // changed key from 'user' to 'loggedInUser'
 
   const navbar = document.querySelector('.navbar-nav');
   if (user) {
@@ -11,11 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem('user');
-      window.location.reload();
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'login.html';
     });
-  } else {
-    // Optional: Redirect to login if not logged in
-    // window.location.href = "loginPage.html";
   }
 });
+if (!user) {
+  window.location.href = 'login.html';
+}

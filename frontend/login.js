@@ -13,11 +13,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const result = await response.json();
   alert(result.message);
 
-// After successful login
-if (response.ok) {
-  const userData = await response.json();
-  localStorage.setItem('loggedInUser', JSON.stringify(userData.user));
-  window.location.href = 'home.html';
-}
+  if (response.ok) {
+    localStorage.setItem('loggedInUser', JSON.stringify(result.user));
+    window.location.href = 'home.html';
+  }
 });
+
 
