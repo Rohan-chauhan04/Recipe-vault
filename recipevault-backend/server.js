@@ -1,103 +1,81 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+// recipevault-backend/server.js
+const express    = require('express');
+const cors       = require('cors');
+const path       = require('path');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
+const bcrypt     = require('bcrypt');
 require('dotenv').config();
 
-const pool = require('./db'); // PostgreSQL database connection pool
-const app = express();
+const pool         = require('./db');
+const recipeRoutes = require('./routes/recipes');      // <─ router file
+
+const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// ──────────────────────────  MIDDLEWARE
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend'))); // Serve frontend files
 
-// ✅ Test database connection
-app.get('/db-test', async (req, res) => {
+// serve static frontend files  http://localhost:5000/login.html  etc.
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ──────────────────────────  API ROUTES
+app.use('/api/recipes', recipeRoutes);                     // e.g. POST /recipes/add
+
+// signup
+app.post('/signup', async (req, res) => {
+  const { username, email, password } = req.body;
   try {
-    const result = await pool.query('SELECT NOW()');
-    res.json(result.rows);
+    const dup = await pool.query('SELECT 1 FROM users WHERE email = $1', [email]);
+    if (dup.rowCount) return res.status(400).json({ message: 'Email already registered' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await pool.query(
+      'INSERT INTO users (username, email, password) VALUES ($1,$2,$3) RETURNING id, username, email',
+      [username, email, hash]
+    );
+    res.status(201).json({ message: 'User created', user: rows[0] });
   } catch (err) {
-    console.error("FULL DB ERROR:", err);
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = rows[0];
+    if (!user) return res.status(400).json({ message: 'User not found' });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok)   return res.status(400).json({ message: 'Incorrect password' });
+
+    res.json({ message: 'Login successful', user: { id: user.id, username: user.username, email: user.email } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// health‑check
+app.get('/db-test', async (_, res) => {
+  try {
+    const { rows } = await pool.query('SELECT NOW()');
+    res.json(rows);
+  } catch (e) {
     res.status(500).send('Database error');
   }
 });
 
-// ✅ Root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'login.html'));
-});
+// send login page at root
+app.get('/', (_, res) =>
+  res.sendFile(path.join(__dirname, '../frontend', 'login.html'))
+);
 
-// ✅ Signup route
-app.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
+// 404 fallback
+app.use((_, res) => res.status(404).send('404 Not Found'));
 
-  try {
-    const existingUser = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: 'Email already registered' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await pool.query(
-      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email',
-      [username, email, hashedPassword]
-    );
-
-    res.status(201).json({
-      message: 'User created successfully',
-      user: result.rows[0]
-    });
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// ✅ Login route
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(400).json({ message: 'User not found' });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(400).json({ message: 'Incorrect password' });
-    }
-
-    res.status(200).json({
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email
-      }
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// ✅ Fallback: send 404 for unknown routes
-app.use((req, res) => {
-  res.status(404).send('404 Not Found');
-});
-
-// ✅ Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+// ──────────────────────────  START
+app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
