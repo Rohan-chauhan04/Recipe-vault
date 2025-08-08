@@ -25,7 +25,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   // ─────────────────────────────────────────────────────────────────
 
   try {
-    const res = await fetch('/login', {
+    const res = await fetch(apiUrl('/login'), {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({ email, password })
@@ -36,7 +36,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       // save user info then toast + redirect
       localStorage.setItem('loggedInUser', JSON.stringify(data.user));
       showToast('Login successful!');
-      setTimeout(() => (window.location.href = 'home.html'), 2000);
+      setTimeout(() => (window.location.href = 'home.html'), 800);
     } else {
       showToast(data.message || 'Login failed', false);
     }

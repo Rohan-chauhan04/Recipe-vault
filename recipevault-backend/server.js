@@ -13,14 +13,79 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ──────────────────────────  MIDDLEWARE
-app.use(cors());
-app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5000',
+      'http://127.0.0.1:5000',
+    ],
+  })
+);
+app.use(bodyParser.json({ limit: '6mb' }));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Swallow noisy extension calls like /hybridaction/* before anything else
+app.use((req, res, next) => {
+  const pathLower = (req.path || '').toLowerCase();
+  if (pathLower.startsWith('/hybridaction') || pathLower === '/favicon.ico') {
+    return res.sendStatus(204);
+  }
+  return next();
+});
+
+// Extra hard stop for any /hybridaction* path variations
+app.all(/^\/hybridaction/i, (_req, res) => res.sendStatus(204));
 
 // serve static frontend files
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ──────────────────────────  API ROUTES
 app.use("/api/recipes", recipeRoutes);
+
+// ──────────────────────────  SCHEMA ENSURE (simple migrations)
+async function ensureSchema() {
+  // users
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  // recipes
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS recipes (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      category TEXT,
+      cuisine TEXT,
+      image_url TEXT,
+      image_data BYTEA,
+      image_mime TEXT,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  // ingredients
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ingredients (
+      id SERIAL PRIMARY KEY,
+      recipe_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      quantity TEXT
+    )
+  `);
+  // Add missing columns if table existed already
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category TEXT`);
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS cuisine TEXT`);
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_url TEXT`);
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_data BYTEA`);
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_mime TEXT`);
+  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE SET NULL`);
+}
 
 // signup
 app.post("/signup", async (req, res) => {
@@ -79,11 +144,33 @@ app.get("/db-test", async (_, res) => {
 
 // send login page at root
 app.get("/", (_, res) =>
-  res.sendFile(path.join(__dirname, "../frontend", "login.html"))
+  res.sendFile(path.join(__dirname, "../frontend", "home.html"))
 );
 
-// 404 fallback
-app.use((_, res) => res.status(404).send("404 Not Found"));
+// 404 fallback (API-aware)
+app.use((req, res) => {
+  if ((req.path || '').startsWith('/api/')) {
+    return res.status(404).json({ message: 'Not Found' });
+  }
+  return res.status(404).send('404 Not Found');
+});
 
-// ──────────────────────────  START
-app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
+// Global error handler (API-aware)
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if ((req.path || '').startsWith('/api/')) {
+    return res.status(500).json({ message: 'Server error' });
+  }
+  return res.status(500).send('Server error');
+});
+
+// ──────────────────────────  START (local-only)
+ensureSchema()
+  .then(() => {
+    app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));
+  })
+  .catch((e) => {
+    console.error('Schema ensure failed:', e);
+    app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT} (schema errors logged)`));
+  });

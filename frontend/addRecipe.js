@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   if (!user) {
     showToast("Please login first", false);
-    setTimeout(() => (window.location.href = "loginPage.html"), 1500);
+    setTimeout(() => (window.location.href = "login.html"), 1500);
     return;
   }
 
@@ -12,6 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const ingredientsContainer = document.getElementById("ingredientsContainer");
   const addIngredientBtn = document.getElementById("addIngredientBtn");
   const form = document.getElementById("recipeForm");
+  const categorySelect = document.getElementById("recipeCategory");
+  const cuisineInput = document.getElementById("recipeCuisine");
+  const imageUrlInput = document.getElementById("recipeImageUrl");
+  const imageFileInput = document.getElementById("recipeImageFile");
 
   // helper: create toast
   function showToast(msg, success = true) {
@@ -72,26 +76,27 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const imageUrl = document.getElementById("recipeImage").value.trim();
+    const category = categorySelect.value;
+    const cuisine = cuisineInput.value.trim();
+    const imageUrl = imageUrlInput.value.trim();
 
-    body: JSON.stringify({
-      user_id: user.id,
-      title,
-      description,
-      ingredients,
-      image_url: imageUrl,
-    });
+    // Build multipart form data to support optional image file
+    const formData = new FormData();
+    formData.append('user_id', user.id);
+    formData.append('title', title);
+    formData.append('description', description);
+    if (category) formData.append('category', category);
+    if (cuisine) formData.append('cuisine', cuisine);
+    if (imageUrl) formData.append('image_url', imageUrl);
+    formData.append('ingredients', JSON.stringify(ingredients));
+    if (imageFileInput.files && imageFileInput.files[0]) {
+      formData.append('image', imageFileInput.files[0]);
+    }
 
     try {
-      const res = await fetch("/api/recipes", {
+      const res = await fetch(apiUrl("/api/recipes"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.id,
-          title,
-          description,
-          ingredients,
-        }),
+        body: formData,
       });
       const data = await res.json();
 

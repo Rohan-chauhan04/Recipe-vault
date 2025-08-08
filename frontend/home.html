@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RecipeVault</title>
+  <meta name="api-base" content="">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
     body {
@@ -70,17 +71,15 @@
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">
-      <a class="navbar-brand" href="#">RecipeVault</a>
-      <div class="collapse navbar-collapse">
+      <a class="navbar-brand" href="home.html">RecipeVault</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarsExample">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Recipes</a></li>
-          <!-- <li class="nav-item"><a class="nav-link" href="addRecipe.html">Add Recipe</a></li> -->
-          <li class="nav-item"><a class="nav-link" href="#">Categories</a></li>
-          <li class="nav-item"><a class="nav-link" href="loginPage.html">Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="signUpPage.html">Signup</a></li>
+          <!-- Will be populated by app.js -->
         </ul>
       </div>
     </div>
@@ -91,7 +90,7 @@
   <div class="container">
     <h1 class="display-4">Discover, Create, and Share Delicious Recipes</h1>
     <p>Explore new dishes or share your own with the world!</p>
-    <a href="#" class="btn btn-warning btn-lg mt-3">Browse Recipes</a>
+    <a href="recipes.html" class="btn btn-warning btn-lg mt-3">Browse Recipes</a>
     <br />
     <a href="addRecipe.html" class="btn btn-success btn-lg mt-3">Add Your Recipe</a>
   </div>
@@ -113,11 +112,11 @@
     <div class="container">
       <h2 class="mb-4 text-center" style="color: #d2691e;">Browse by Categories</h2>
       <div class="text-center">
-        <a href="#" class="category-link">Dessert</a>
-        <a href="#" class="category-link">Main Course</a>
-        <a href="#" class="category-link">Vegan</a>
-        <a href="#" class="category-link">Snacks</a>
-        <a href="#" class="category-link">Drinks</a>
+        <a href="recipes.html?category=Dessert" class="category-link">Dessert</a>
+        <a href="recipes.html?category=Main%20Course" class="category-link">Main Course</a>
+        <a href="recipes.html?category=Vegan" class="category-link">Vegan</a>
+        <a href="recipes.html?category=Snacks" class="category-link">Snacks</a>
+        <a href="recipes.html?category=Drinks" class="category-link">Drinks</a>
       </div>
     </div>
   </section>
@@ -128,6 +127,8 @@
       <p>&copy; 2025 RecipeVault | All rights reserved.</p>
     </div>
   </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
 <script src="home.js"></script>
 </body>
 </html>

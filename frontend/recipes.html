@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Recipes | RecipeVault</title>
+  <meta name="api-base" content="">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <style>
+    body { background-color: #fffdf6; }
+    .navbar { background-color: #ffa07a !important; }
+    .navbar-brand, .nav-link { color: #fff !important; font-weight: 600; }
+    .filter-bar { background: #ffefd5; border: 1px solid #ffa07a; border-radius: 12px; padding: 16px; }
+    .card { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform .2s; }
+    .card:hover { transform: translateY(-2px); }
+    .recipe-card img { height: 200px; object-fit: cover; }
+    .badge-cat { background: #ffd4a3; color: #8b4513; }
+  </style>
+  </head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+      <a class="navbar-brand" href="home.html">RecipeVault</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarsExample">
+        <ul class="navbar-nav ms-auto">
+          <!-- Populated by app.js -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="filter-bar mb-4">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Search</label>
+          <input id="searchInput" class="form-control" placeholder="Find recipe..." />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Category</label>
+          <select id="categorySelect" class="form-select">
+            <option value="">All</option>
+            <option>Dessert</option>
+            <option>Main Course</option>
+            <option>Vegan</option>
+            <option>Snacks</option>
+            <option>Drinks</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Cuisine</label>
+          <input id="cuisineInput" class="form-control" placeholder="e.g., Italian" />
+        </div>
+        <div class="col-md-2 d-grid">
+          <button id="applyFilters" class="btn btn-warning">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" class="row"></div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <button id="prevPage" class="btn btn-outline-secondary">Prev</button>
+      <span id="pageInfo" class="small text-muted"></span>
+      <button id="nextPage" class="btn btn-outline-secondary">Next</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="recipeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Recipe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImage" class="img-fluid rounded mb-3" alt="" />
+          <p id="modalMeta" class="mb-1"></p>
+          <p id="modalDesc" class=""></p>
+          <h6>Ingredients</h6>
+          <ul id="modalIngredients" class="list-group"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+  <script src="recipes.js"></script>
+</body>
+</html>
+
+
