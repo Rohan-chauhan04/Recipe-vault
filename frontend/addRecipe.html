@@ -10,18 +10,29 @@
   <div class="container mt-5">
     <h2>Add New Recipe</h2>
     <form id="recipeForm">
+      
+      <!-- Recipe Title -->
       <div class="mb-3">
         <label for="recipeTitle" class="form-label">Title</label>
         <input type="text" class="form-control" id="recipeTitle" required />
       </div>
+
+      <!-- Recipe Description -->
       <div class="mb-3">
         <label for="recipeDescription" class="form-label">Description</label>
         <textarea class="form-control" id="recipeDescription" rows="3" required></textarea>
       </div>
 
+      <!-- Recipe Image URL -->
+      <div class="mb-3">
+        <label for="recipeImage" class="form-label">Image URL</label>
+        <input type="url" class="form-control" id="recipeImage" placeholder="https://example.com/image.jpg" />
+        <div class="form-text">Optional: Add a direct image link to display your recipe image.</div>
+      </div>
+
+      <!-- Ingredients Section -->
       <div id="ingredientsContainer" class="mb-3">
         <label class="form-label">Ingredients</label>
-        <!-- Ingredient inputs will be added here dynamically -->
         <div class="input-group mb-2 ingredient-row">
           <input type="text" placeholder="Ingredient name" class="form-control ingredient-name" required />
           <input type="text" placeholder="Quantity" class="form-control ingredient-quantity" required />
@@ -29,8 +40,11 @@
         </div>
       </div>
 
+      <!-- Add More Ingredients -->
       <button type="button" id="addIngredientBtn" class="btn btn-secondary mb-3">Add Ingredient</button>
       <br />
+
+      <!-- Submit Button -->
       <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
   </div>

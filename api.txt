@@ -1,0 +1,28 @@
+# RecipeVault API Endpoints
+
+1. User Signup
+   POST /signup
+   - Request body: { username, email, password }
+   - Description: Creates a new user account.
+
+2. User Login
+   POST /login
+   - Request body: { email, password }
+   - Description: Authenticates user and returns user info.
+
+3. Database Test (Health Check)
+   GET /db-test
+   - Description: Tests connection to the database.
+
+4. Add Recipe
+   POST /api/recipes
+   - Request body: { user_id, title, description, ingredients }
+     ingredients: Array of { name, quantity }
+   - Description: Adds a new recipe with ingredients linked to a user.
+
+5. Static Frontend Files
+   Served from root URL (e.g., /login.html, /home.html)
+   - Description: Serves frontend HTML, CSS, JS files.
+
+6. 404 Fallback
+   Any unknown route returns 404 Not Found.
