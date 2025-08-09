@@ -1,6 +1,4 @@
-// addRecipe.js
 document.addEventListener("DOMContentLoaded", () => {
-  // ───────────────────────────  Login guard
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   if (!user) {
     showToast("Please login first", false);
@@ -8,16 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ───────────────────────────  DOM refs
   const ingredientsContainer = document.getElementById("ingredientsContainer");
   const addIngredientBtn = document.getElementById("addIngredientBtn");
   const form = document.getElementById("recipeForm");
   const categorySelect = document.getElementById("recipeCategory");
   const cuisineInput = document.getElementById("recipeCuisine");
-  const imageUrlInput = document.getElementById("recipeImageUrl");
   const imageFileInput = document.getElementById("recipeImageFile");
 
-  // helper: create toast
   function showToast(msg, success = true) {
     const toast = document.createElement("div");
     toast.textContent = msg;
@@ -25,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toast.style.bottom = "20px";
     toast.style.left = "50%";
     toast.style.transform = "translateX(-50%)";
-    toast.style.background = success ? "#28a745" : "#dc3545"; // green or red
+    toast.style.background = success ? "#28a745" : "#dc3545";
     toast.style.color = "white";
     toast.style.padding = "12px 24px";
     toast.style.borderRadius = "8px";
@@ -35,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.remove(), 2000);
   }
 
-  // ───────────────────────────  Add ingredient row
   addIngredientBtn.addEventListener("click", () => {
     const row = document.createElement("div");
     row.className = "input-group mb-2 ingredient-row";
@@ -48,11 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ingredientsContainer.appendChild(row);
   });
 
-  // first row’s delete button
   ingredientsContainer.querySelector(".remove-ingredient-btn").onclick = (e) =>
     e.target.closest(".ingredient-row").remove();
 
-  // ───────────────────────────  Handle form submit
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -61,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .getElementById("recipeDescription")
       .value.trim();
 
-    // Collect ingredients
     const ingredients = [
       ...ingredientsContainer.querySelectorAll(".ingredient-row"),
     ]
@@ -78,16 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const category = categorySelect.value;
     const cuisine = cuisineInput.value.trim();
-    const imageUrl = imageUrlInput.value.trim();
 
-    // Build multipart form data to support optional image file
     const formData = new FormData();
     formData.append('user_id', user.id);
     formData.append('title', title);
     formData.append('description', description);
     if (category) formData.append('category', category);
     if (cuisine) formData.append('cuisine', cuisine);
-    if (imageUrl) formData.append('image_url', imageUrl);
     formData.append('ingredients', JSON.stringify(ingredients));
     if (imageFileInput.files && imageFileInput.files[0]) {
       formData.append('image', imageFileInput.files[0]);

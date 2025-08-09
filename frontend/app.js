@@ -1,5 +1,3 @@
-// frontend/app.js
-
 (function initAppHelpers() {
   function getApiBase() {
     const stored = localStorage.getItem('API_BASE');

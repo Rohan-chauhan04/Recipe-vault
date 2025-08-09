@@ -6,11 +6,23 @@
   <title>Add Recipe | RecipeVault</title>
   <meta name="api-base" content="">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg" style="background-color:#ffa07a">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-      <a class="navbar-brand text-white" href="home.html">RecipeVault</a>
+      <a class="navbar-brand" href="home.html">
+        <span class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <ellipse cx="8" cy="7" rx="2.4" ry="3.4" fill="white"/>
+            <rect x="7.2" y="9.5" width="1.6" height="9" rx="0.8" fill="white"/>
+            <ellipse cx="14.75" cy="6" rx="1.1" ry="2.2" fill="white"/>
+            <rect x="13.5" y="6.1" width="2.5" height="8.5" rx="1.2" fill="white"/>
+            <rect x="14.6" y="13.1" width="1.3" height="5.8" rx="0.8" fill="white"/>
+          </svg>
+        </span>
+        RecipeVault
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -20,16 +32,14 @@
     </div>
   </nav>
   <div class="container mt-4">
-    <h2>Add New Recipe</h2>
+    <h2 class="section-title mb-3">Add New Recipe</h2>
     <form id="recipeForm" enctype="multipart/form-data">
-      
-      <!-- Recipe Title -->
+
       <div class="mb-3">
         <label for="recipeTitle" class="form-label">Title</label>
         <input type="text" class="form-control" id="recipeTitle" required />
       </div>
 
-      <!-- Recipe Description -->
       <div class="mb-3">
         <label for="recipeDescription" class="form-label">Description</label>
         <textarea class="form-control" id="recipeDescription" rows="3" required></textarea>
@@ -37,21 +47,20 @@
 
       <div class="row">
         <div class="col-md-6">
-          <!-- Category -->
           <div class="mb-3">
             <label for="recipeCategory" class="form-label">Category</label>
             <select id="recipeCategory" class="form-select">
-              <option value="">Select category (optional)</option>
-              <option>Dessert</option>
+              <option value="" selected disabled>Select category (optional)</option>
               <option>Main Course</option>
-              <option>Vegan</option>
+              <option>Appetizer</option>
               <option>Snacks</option>
               <option>Drinks</option>
+              <option>Vegan</option>
+              <option>Dessert</option>
             </select>
           </div>
         </div>
         <div class="col-md-6">
-          <!-- Cuisine -->
           <div class="mb-3">
             <label for="recipeCuisine" class="form-label">Cuisine</label>
             <input type="text" id="recipeCuisine" class="form-control" placeholder="e.g., Italian, Nepali, Indian" />
@@ -59,21 +68,14 @@
         </div>
       </div>
 
-      <!-- Recipe Image URL or Upload -->
       <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="recipeImageUrl" class="form-label">Image URL</label>
-          <input type="url" class="form-control" id="recipeImageUrl" placeholder="https://example.com/image.jpg" />
-          <div class="form-text">Optional: Link to an image.</div>
-        </div>
         <div class="col-md-6 mb-3">
           <label for="recipeImageFile" class="form-label">Upload Image</label>
           <input type="file" class="form-control" id="recipeImageFile" accept="image/*" />
-          <div class="form-text">Optional: Upload an image (stored in database).</div>
+          <div class="form-text">Optional</div>
         </div>
       </div>
 
-      <!-- Ingredients Section -->
       <div id="ingredientsContainer" class="mb-3">
         <label class="form-label">Ingredients</label>
         <div class="input-group mb-2 ingredient-row">
@@ -83,11 +85,9 @@
         </div>
       </div>
 
-      <!-- Add More Ingredients -->
-      <button type="button" id="addIngredientBtn" class="btn btn-secondary mb-3">Add Ingredient</button>
+      <button type="button" id="addIngredientBtn" class="btn btn-outline-warning mb-3">Add Ingredient</button>
       <br />
 
-      <!-- Submit Button -->
       <button type="submit" class="btn btn-warning">Add Recipe</button>
     </form>
   </div>

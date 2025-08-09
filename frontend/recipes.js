@@ -2,7 +2,6 @@ let currentPage = 1;
 const limit = 12;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Prefill filters from URL
   const params = new URLSearchParams(location.search);
   if (params.get('category')) document.getElementById('categorySelect').value = params.get('category');
   if (params.get('q')) document.getElementById('searchInput').value = params.get('q');
@@ -21,10 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadRecipes();
 
-  // If an id is present in URL, open the modal after initial load
   const idParam = params.get('id');
   if (idParam) {
-    // slight delay to allow bootstrap to load
     setTimeout(() => openModal(idParam), 250);
   }
 });
@@ -59,10 +56,10 @@ async function loadRecipes() {
 function renderCard(r) {
   const col = document.createElement('div');
   col.className = 'col-md-3 mb-4';
-  const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : (r.image_url || 'images/tea.jpg');
+  const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : 'images/tea.jpg';
   col.innerHTML = `
     <div class="card recipe-card h-100">
-      <img src="${imgSrc}" class="card-img-top" alt="${r.title}">
+      <img src="${imgSrc}" class="card-img-top" alt="${r.title}" onerror="this.onerror=null;this.src='images/tea.jpg';">
       <div class="card-body d-flex flex-column">
         <h5 class="card-title">${r.title}</h5>
         <div class="mb-2">
@@ -85,9 +82,10 @@ async function openModal(id) {
   const res = await fetch(apiUrl(`/api/recipes/${id}`));
   const r = await res.json();
   document.getElementById('modalTitle').innerText = r.title;
-  const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : (r.image_url || 'images/tea.jpg');
+  const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : 'images/tea.jpg';
   const img = document.getElementById('modalImage');
   img.src = imgSrc; img.alt = r.title;
+  img.onerror = () => { img.onerror = null; img.src = 'images/tea.jpg'; };
   document.getElementById('modalDesc').innerText = r.description || '';
   document.getElementById('modalMeta').innerHTML = `
     <span class="badge badge-cat me-2">${r.category || 'Uncategorized'}</span>

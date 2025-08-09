@@ -1,11 +1,9 @@
-// login.js
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const email    = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value.trim();
 
-  // ─── Toast helper (same as addRecipe.js) ──────────────────────────
   function showToast(msg, success = true, delay = 2000) {
     const toast         = document.createElement('div');
     toast.textContent   = msg;
@@ -22,7 +20,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), delay);
   }
-  // ─────────────────────────────────────────────────────────────────
 
   try {
     const res = await fetch(apiUrl('/login'), {
@@ -33,7 +30,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      // save user info then toast + redirect
       localStorage.setItem('loggedInUser', JSON.stringify(data.user));
       showToast('Login successful!');
       setTimeout(() => (window.location.href = 'home.html'), 800);
@@ -41,7 +37,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       showToast(data.message || 'Login failed', false);
     }
   } catch (err) {
-    console.error(err);
     showToast('Network / server error', false);
   }
 });

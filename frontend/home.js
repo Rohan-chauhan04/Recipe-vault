@@ -10,7 +10,6 @@ async function loadFeaturedRecipes() {
       throw new Error(msg || `Failed with ${res.status}`);
     }
     const recipes = await res.json();
-    console.log("Recipes:", recipes);
 
     const container = document.querySelector('#featured-recipes');
     container.innerHTML = '';
@@ -21,11 +20,11 @@ async function loadFeaturedRecipes() {
     }
 
     recipes.forEach(r => {
-      const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : (r.image_url || 'images/tea.jpg');
+      const imgSrc = r.has_image ? apiUrl(`/api/recipes/${r.id}/image`) : 'images/tea.jpg';
       container.innerHTML += `
         <div class="col-md-3 mb-4">
           <div class="card recipe-card h-100">
-            <img src="${imgSrc}" class="card-img-top" alt="${r.title}">
+            <img src="${imgSrc}" class="card-img-top" alt="${r.title}" onerror="this.onerror=null;this.src='images/tea.jpg';">
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">${r.title}</h5>
               <p class="card-text small flex-grow-1">${r.description || 'No description provided'}</p>
@@ -39,7 +38,6 @@ async function loadFeaturedRecipes() {
       `;
     });
   } catch (error) {
-    console.error("Error loading recipes:", error);
     document.querySelector('#featured-recipes').innerHTML = `
       <div class="col-12 text-center text-danger">
         Failed to load recipes. Please try again later.
