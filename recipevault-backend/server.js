@@ -1,4 +1,3 @@
-// recipevault-backend/server.js
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -7,12 +6,11 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const pool = require("./db");
-const recipeRoutes = require("./routes/recipes"); // <─ router file
+const recipeRoutes = require("./routes/recipes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ──────────────────────────  MIDDLEWARE
 app.use(
   cors({
     origin: [
@@ -24,7 +22,6 @@ app.use(
 app.use(bodyParser.json({ limit: '6mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Swallow noisy extension calls like /hybridaction/* before anything else
 app.use((req, res, next) => {
   const pathLower = (req.path || '').toLowerCase();
   if (pathLower.startsWith('/hybridaction') || pathLower === '/favicon.ico') {
@@ -33,18 +30,13 @@ app.use((req, res, next) => {
   return next();
 });
 
-// Extra hard stop for any /hybridaction* path variations
 app.all(/^\/hybridaction/i, (_req, res) => res.sendStatus(204));
 
-// serve static frontend files
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// ──────────────────────────  API ROUTES
 app.use("/api/recipes", recipeRoutes);
 
-// ──────────────────────────  SCHEMA ENSURE (simple migrations)
 async function ensureSchema() {
-  // users
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -54,7 +46,6 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  // recipes
   await pool.query(`
     CREATE TABLE IF NOT EXISTS recipes (
       id SERIAL PRIMARY KEY,
@@ -62,14 +53,12 @@ async function ensureSchema() {
       description TEXT,
       category TEXT,
       cuisine TEXT,
-      image_url TEXT,
       image_data BYTEA,
       image_mime TEXT,
       user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  // ingredients
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ingredients (
       id SERIAL PRIMARY KEY,
@@ -78,10 +67,8 @@ async function ensureSchema() {
       quantity TEXT
     )
   `);
-  // Add missing columns if table existed already
   await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category TEXT`);
   await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS cuisine TEXT`);
-  await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_url TEXT`);
   await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_data BYTEA`);
   await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS image_mime TEXT`);
   await pool.query(`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE SET NULL`);
@@ -131,8 +118,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-// health‑check
+// db-test
 app.get("/db-test", async (_, res) => {
   try {
     const { rows } = await pool.query("SELECT NOW()");
@@ -141,22 +127,18 @@ app.get("/db-test", async (_, res) => {
     res.status(500).send("Database error");
   }
 });
-
-// send login page at root
+// home.html
 app.get("/", (_, res) =>
   res.sendFile(path.join(__dirname, "../frontend", "home.html"))
 );
-
-// 404 fallback (API-aware)
+// 404
 app.use((req, res) => {
   if ((req.path || '').startsWith('/api/')) {
     return res.status(404).json({ message: 'Not Found' });
   }
   return res.status(404).send('404 Not Found');
 });
-
-// Global error handler (API-aware)
-// eslint-disable-next-line no-unused-vars
+// server error
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   if ((req.path || '').startsWith('/api/')) {
@@ -165,7 +147,6 @@ app.use((err, req, res, next) => {
   return res.status(500).send('Server error');
 });
 
-// ──────────────────────────  START (local-only)
 ensureSchema()
   .then(() => {
     app.listen(PORT, () => console.log(`🚀  http://localhost:${PORT}`));

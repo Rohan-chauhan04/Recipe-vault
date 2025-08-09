@@ -3,19 +3,16 @@ const router = express.Router();
 const pool = require('../db');
 const multer = require('multer');
 
-// Use memory storage to allow storing image bytes in Postgres (BYTEA)
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-// POST /api/recipes – Add new recipe (supports multipart with image)
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { title, description, category, cuisine, image_url, user_id } = req.body;
+    const { title, description, category, cuisine, user_id } = req.body;
     let ingredients = [];
     try {
-      // ingredients is expected as JSON string in multipart or array in JSON
       ingredients = typeof req.body.ingredients === 'string'
         ? JSON.parse(req.body.ingredients)
         : Array.isArray(req.body.ingredients)
@@ -33,8 +30,8 @@ router.post('/', upload.single('image'), async (req, res) => {
     const imageMime = req.file ? req.file.mimetype : null;
 
     const insertRecipeQuery = `
-      INSERT INTO recipes (title, description, category, cuisine, image_url, image_data, image_mime, user_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO recipes (title, description, category, cuisine, image_data, image_mime, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id
     `;
     const insertRecipeValues = [
@@ -42,7 +39,6 @@ router.post('/', upload.single('image'), async (req, res) => {
       description || null,
       category || null,
       cuisine || null,
-      image_url || null,
       imageBuffer,
       imageMime,
       user_id,
@@ -69,8 +65,6 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// GET /api/recipes – List recipes with filters and pagination
-// Query params: q, category, cuisine, limit, page
 router.get('/', async (req, res) => {
   try {
     const { q, category, cuisine } = req.query;
@@ -100,7 +94,7 @@ router.get('/', async (req, res) => {
     params.push(offset);
 
     const listQuery = `
-      SELECT r.id, r.title, r.description, r.category, r.cuisine, r.image_url,
+      SELECT r.id, r.title, r.description, r.category, r.cuisine,
              (r.image_data IS NOT NULL) AS has_image,
              u.username
       FROM recipes r
@@ -118,14 +112,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/recipes/:id – Recipe details with ingredients
 router.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return res.status(400).json({ msg: 'Invalid id' });
 
     const query = `
-      SELECT r.id, r.title, r.description, r.category, r.cuisine, r.image_url,
+      SELECT r.id, r.title, r.description, r.category, r.cuisine,
              (r.image_data IS NOT NULL) AS has_image,
              u.username,
              COALESCE(json_agg(json_build_object('name', i.name, 'quantity', i.quantity)
@@ -146,7 +139,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET /api/recipes/:id/image – Serve stored image if available
 router.get('/:id/image', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
