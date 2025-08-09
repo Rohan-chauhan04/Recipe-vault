@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Recipes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #ff6f61;
+      padding: 15px;
+      text-align: center;
+      color: white;
+      font-size: 1.5em;
+    }
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      padding: 15px;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .search-bar input, .search-bar select, .search-bar button {
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .search-bar button {
+      background: #ff6f61;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .search-bar button:hover {
+      background: #e65b50;
+    }
+    .recipes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+    .recipe-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 15px;
+      transition: transform 0.2s;
+    }
+    .recipe-card:hover {
+      transform: scale(1.03);
+    }
+    .recipe-card h3 {
+      margin: 0 0 10px;
+      color: #333;
+    }
+    .recipe-card p {
+      color: #666;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>Browse Recipes</header>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search recipes...">
+    <select id="category">
+      <option value="">All Categories</option>
+      <option value="Breakfast">Breakfast</option>
+      <option value="Lunch">Lunch</option>
+      <option value="Dinner">Dinner</option>
+      <option value="Dessert">Dessert</option>
+    </select>
+    <button onclick="fetchRecipes()">Search</button>
+  </div>
+
+  <div class="recipes-container" id="recipes-container">
+    <!-- Recipes will load here -->
+  </div>
+
+  <script>
+    async function fetchRecipes() {
+      const search = document.getElementById("search").value.trim();
+      const category = document.getElementById("category").value;
+      let url = "/api/recipes";
+
+      const params = [];
+      if (search) params.push(`search=${encodeURIComponent(search)}`);
+      if (category) params.push(`category=${encodeURIComponent(category)}`);
+      if (params.length) url += "?" + params.join("&");
+
+      const res = await fetch(url);
+      const data = await res.json();
+      displayRecipes(data);
+    }
+
+    function displayRecipes(recipes) {
+      const container = document.getElementById("recipes-container");
+      container.innerHTML = "";
+      if (recipes.length === 0) {
+        container.innerHTML = "<p>No recipes found.</p>";
+        return;
+      }
+      recipes.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "recipe-card";
+        card.innerHTML = `<h3>${r.title}</h3><p>${r.description || ""}</p>`;
+        container.appendChild(card);
+      });
+    }
+
+    // Load all recipes on page load
+    fetchRecipes();
+  </script>
+</body>
+</html>
